@@ -14,7 +14,7 @@ URL_RE = re.compile(r"(https?://\S+)")
 
 YTDLP_OPTS = {
     "outtmpl": "%(title).60s_%(id)s.%(ext)s",
-    "format": "mp4/bestvideo+bestaudio/best",
+    "format": "bestvideo*+bestaudio/best",   # quan trọng
     "merge_output_format": "mp4",
     "noplaylist": True,
     "quiet": True,
