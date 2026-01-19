@@ -29,7 +29,8 @@ class HealthHandler(BaseHTTPRequestHandler):
 
 def run_http_server():
     port = int(os.getenv("PORT", "10000"))
-    HTTPServer(("0.0.0.0", port), HealthHandler).serve_forever()
+    server = HTTPServer(("0.0.0.0", port), HealthHandler)
+    server.serve_forever()
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text or ""
