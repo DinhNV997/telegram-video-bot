@@ -1,6 +1,9 @@
 import os
 import re
 import tempfile
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
 from telegram import Update
 from telegram.constants import ChatAction
 from telegram.ext import Application, MessageHandler, ContextTypes, filters
@@ -16,6 +19,19 @@ YTDLP_OPTS = {
     "noplaylist": True,
     "quiet": True,
 }
+
+# --- tiny web server for Render port binding ---
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(b"OK")
+
+def run_http_server():
+    port = int(os.getenv("PORT", "10000"))
+    server = HTTPServer(("0.0.0.0", port), HealthHandler)
+    server.serve_forever()
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text or ""
@@ -47,6 +63,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     if not BOT_TOKEN:
         raise RuntimeError("Thiếu BOT_TOKEN. Hãy set BOT_TOKEN trước khi chạy.")
+
+    # start web server thread (for Render)
+    t = threading.Thread(target=run_http_server, daemon=True)
+    t.start()
+
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     app.run_polling()
