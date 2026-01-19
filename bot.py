@@ -22,10 +22,15 @@ YTDLP_OPTS = {
 
 # health check server for Render (bind PORT)
 class HealthHandler(BaseHTTPRequestHandler):
+    def do_HEAD(self):
+        self.send_response(200)
+        self.end_headers()
+
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
         self.wfile.write(b"OK")
+
 
 def run_http_server():
     port = int(os.getenv("PORT", "10000"))
